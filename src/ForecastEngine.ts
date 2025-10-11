@@ -4,6 +4,12 @@ import { getQuantileRange } from "./indicators/quantile";
 import { getFibonacciLevels } from "./indicators/fibonacci";
 import { elliottWavePhase } from "./indicators/elliott";
 import { formatForecastMessage } from "./format/userMessage";
+import { getBollingerBands } from "./indicators/bollinger";
+
+const bollinger = getBollingerBands(candles);
+const volatilityHint = bollinger.upper - bollinger.lower < 0.01 * bollinger.middle
+  ? "Low volatility — breakout likely"
+  : "Wide bands — high volatility";
 
 export class ForecastEngine {
   async run(pair: string): Promise<string> {
