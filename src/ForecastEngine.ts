@@ -4,6 +4,7 @@ import { getQuantileRange } from "./indicators/quantile";
 import { getFibonacciLevels } from "./indicators/fibonacci";
 import { elliottWavePhase } from "./indicators/elliott";
 import { getBollingerBands } from "./indicators/bollinger";
+import { transformerWorker } from "./models/transformerWorker";
 import { formatForecastMessage } from "./format/userMessage";
 
 export class ForecastEngine {
@@ -24,6 +25,14 @@ export class ForecastEngine {
         ? "Low volatility — breakout likely"
         : "Wide bands — high volatility";
 
+    const transformerHint = transformerWorker({
+      price: candles[candles.length - 1].close,
+      volume: candles[candles.length - 1].volume,
+      fundingRate: 0.012, // заміни на реальний з EVEDEX або CoinGecko
+      emaTrend: trend,
+      elliottPhase: elliott,
+    });
+
     return formatForecastMessage({
       pair,
       currentPrice: candles[candles.length - 1].close,
@@ -33,6 +42,7 @@ export class ForecastEngine {
       elliott,
       bollinger,
       volatilityHint,
+      transformerHint,
     });
   }
 }
