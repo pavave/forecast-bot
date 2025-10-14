@@ -8,6 +8,7 @@ import { getBollingerBands } from "./indicators/bollinger";
 import { transformerWorker } from "./models/transformerWorker";
 import { formatForecastMessage } from "./format/userMessage";
 
+
 type Candle = {
   time: number;
   open: number;
