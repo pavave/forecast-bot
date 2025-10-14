@@ -1,1 +1,18 @@
+{
+  "name": "forecast-bot",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@vercel/og": "^0.6.0",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
 
