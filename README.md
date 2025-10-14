@@ -46,6 +46,12 @@ TELEGRAM_TOKEN=your_telegram_bot_token
 PYTHON_PATH=/usr/bin/python3 # optional, if using Prophet
 ```
 
+### 4. Install Vercel CLI
+
+```bash
+npm install -g vercel
+```
+
 ## 🔧 Local Development
 
 ```bash
