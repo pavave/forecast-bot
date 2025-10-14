@@ -1,1 +1,12 @@
+{
+  "functions": {
+    "api/forecast.ts": { "memory": 512, "maxDuration": 10 },
+    "api/shareFarcaster.ts": { "memory": 512, "maxDuration": 10 },
+    "api/shareTwitter.ts": { "memory": 512, "maxDuration": 10 },
+    "api/telegramWebhook.ts": { "memory": 512, "maxDuration": 10 }
+  },
+  "rewrites": [
+    { "source": "/telegram", "destination": "/telegram/webApp.html" }
+  ]
+}
 
