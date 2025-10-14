@@ -1,4 +1,5 @@
 import { fetchBinanceOHLCV } from "./data/fetchBinance";
+import { fetchFundingRateFromBinance } from "./data/fetchFundingRate";
 import { getEMA } from "./indicators/ema";
 import { getQuantileRange } from "./indicators/quantile";
 import { getFibonacciLevels } from "./indicators/fibonacci";
@@ -7,9 +8,18 @@ import { getBollingerBands } from "./indicators/bollinger";
 import { transformerWorker } from "./models/transformerWorker";
 import { formatForecastMessage } from "./format/userMessage";
 
+type Candle = {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+};
+
 export class ForecastEngine {
   async run(pair: string): Promise<string> {
-    const candles = await fetchBinanceOHLCV(pair, "1d");
+    const candles: Candle[] = await fetchBinanceOHLCV(pair, "1d");
 
     const ema9 = getEMA(candles, 9);
     const ema21 = getEMA(candles, 21);
@@ -25,10 +35,12 @@ export class ForecastEngine {
         ? "Low volatility — breakout likely"
         : "Wide bands — high volatility";
 
-    const transformerHint = transformerWorker({
+    const fundingRate = await fetchFundingRateFromBinance(pair); // ✅ пункт 1
+
+    const transformerHint = await transformerWorker({ // ✅ пункт 2
       price: candles[candles.length - 1].close,
       volume: candles[candles.length - 1].volume,
-      fundingRate: 0.012, // заміни на реальний з EVEDEX або CoinGecko
+      fundingRate,
       emaTrend: trend,
       elliottPhase: elliott,
     });
