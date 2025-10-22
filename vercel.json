@@ -1,22 +1,22 @@
 {
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/index.html"
+    }
+  ],
   "functions": {
     "api/forecast.ts": {
-      "memory": 512,
+      "memory": 1024,
       "maxDuration": 10
     },
     "api/telegramWebhook.ts": {
-      "memory": 512,
-      "maxDuration": 10
-    },
-    "api/og-image.ts": {
-      "memory": 512,
+      "memory": 1024,
       "maxDuration": 10
     }
-  },
-  "rewrites": [
-    {
-      "source": "/telegram",
-      "destination": "/telegram/webApp.html"
-    }
-  ]
+  }
 }
