@@ -1,18 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+    "outDir": "./dist",
+    "strict": false,
+    "noImplicitAny": false,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
     "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "types": ["node", "dom"]
+    "moduleResolution": "node"
   },
-  "include": ["src", "api"]
+  "include": ["src/**/*", "api/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
-
