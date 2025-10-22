@@ -1,14 +1,21 @@
 {
   "name": "forecast-bot",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "description": "A crypto forecasting bot that analyzes technical indicators (EMA, Bollinger Bands, Fibonacci, Elliott Waves, Quantiles) and generates shareable predictions for any trading pair. Users can copy forecasts and share them manually via Telegram, Farcaster, X (Twitter), or anywhere else.",
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
     "build": "tsc"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "@vercel/og": "^0.6.0",
+    "@vercel/node": "^5.4.0",
     "node-fetch": "^3.3.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
