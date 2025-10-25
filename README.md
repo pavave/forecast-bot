@@ -1,97 +1,84 @@
-# 🔮 Forecast Bot
+# 🤖 ForecastBot v2.0
 
-A crypto forecasting bot that analyzes technical indicators (EMA, Bollinger Bands, Fibonacci, Elliott Waves, Quantiles) and generates shareable predictions for any trading pair. Users can copy forecasts and share them manually via Telegram, Farcaster, X (Twitter), or anywhere else.
+AI-powered cryptocurrency market forecasting bot.
 
-## 🚀 Features
+## Features
 
-- 📊 Technical analysis using OHLCV data from Binance
-- 🧠 Transformer-based signal hints
-- 🖼 OG-image preview for Farcaster Frames, X, and Telegram
-- 📋 "Copy Forecast" button for easy sharing
-- 🧑‍💻 Telegram bot integration
-- ⚡️ Vercel-ready deployment
+- 📊 Technical Analysis (EMA, Bollinger Bands, Fibonacci)
+- 🧠 ML Sentiment Analysis (Hugging Face FinBERT)
+- 💰 Funding Rate Tracking (Binance Futures)
+- 🤖 Telegram Bot Interface
+- 🌐 REST API Endpoints
 
----
+## Quick Start
 
-## 🧑‍💻 Developer Setup
+### 1. Setup Telegram Bot
 
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/pavave/forecast-bot.git
-cd forecast-bot
+Message [@BotFather](https://t.me/BotFather):
 ```
-### 2. Install dependencies
-
-```bash
-pnpm install
+/newbot
 ```
 
-If you don’t have pnpm installed:
+### 2. Install Dependencies
 
 ```bash
-npm install -g pnpm
+npm install
 ```
 
-### 3. Create environment file
+### 3. Configure Environment
 
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env.local
+# Edit .env.local with your tokens
 ```
 
-Fill in your Telegram bot token:
-
-```bash
-TELEGRAM_TOKEN=your_telegram_bot_token
-PYTHON_PATH=/usr/bin/python3 # optional, if using Prophet
-```
-
-### 4. Install Vercel CLI
+### 4. Deploy to Vercel
 
 ```bash
 npm install -g vercel
-```
-
-## 🔧 Local Development
-
-```bash
-vercel dev
-```
-
-Visit: http://localhost:3000
-
-## 🚀 Deploy to Vercel
-
-```bash
+vercel login
 vercel --prod
 ```
 
-## 🤖 Telegram Bot Setup
-1. Create a bot via BotFather
-2. Get your token and paste it into .env.local
-3. Set the webhook:
+### 5. Set Webhook
 
 ```bash
-curl "https://api.telegram.org/bot<YOUR_TOKEN>/setWebhook?url=https://your-vercel-app.vercel.app/api/telegramWebhook"
+curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
+  -d "url=https://your-app.vercel.app/api/telegramWebhook"
 ```
 
-Now users can message your bot with a pair like BTC-USDC and receive a forecast.
+## API Usage
 
-## 📦 Dependencies
+### Get Forecast
 
 ```bash
-{
-  "ccxt": "^4.1.89",
-  "node-fetch": "^3.3.2",
-  "vercel": "^28.18.0",
-  "typescript": "^5.x",
-  "react": "^18.x",
-  "next": "^13.x",
-  "zod": "^3.x"
-}
+curl https://your-app.vercel.app/api/forecast?symbol=BTCUSDT
 ```
 
-All dependencies are managed via pnpm. See package.json for full list.
+### Telegram Commands
 
-## 🧠 Author
-Built by pavave — blending technical precision with meme-driven UX for viral crypto tools.
+- `/start` - Start bot
+- `/forecast BTC` - Get BTC forecast
+- Send symbol directly: `BTC`, `ETH`, `SOL`
+
+## Development
+
+```bash
+# Run locally
+npm run dev
+
+# Test API
+curl http://localhost:3000/api/forecast?symbol=ETHUSDT
+```
+
+## Tech Stack
+
+- **Runtime**: Node.js + TypeScript
+- **Deployment**: Vercel Serverless Functions
+- **Data**: Binance API
+- **ML**: Hugging Face Inference API
+- **Bot**: Telegram Bot API
+
+## License
+
+MIT

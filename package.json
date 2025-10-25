@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "echo 'Build skipped'",
+    "build": "echo 'Build skipped for dev'",
     "deploy": "vercel --prod"
   },
   "dependencies": {

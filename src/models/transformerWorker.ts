@@ -1,40 +1,29 @@
-// src/models/transformerWorker.ts
-// ML-based market sentiment analysis using Hugging Face
-
-interface TransformerInput {
+interface MLInput {
   price: number;
   volume: number;
   ema9: number;
   ema21: number;
   fundingRate: number;
-  bollingerPosition: number; // -1 to 1
+  bollingerPosition: number;
 }
 
-interface TransformerOutput {
+interface MLOutput {
   signal: 'bullish' | 'bearish' | 'neutral';
-  confidence: number; // 0-1
+  confidence: number;
   reasoning: string;
 }
 
-export async function analyzeWithTransformer(
-  input: TransformerInput
-): Promise<TransformerOutput> {
-  const HF_API_KEY = process.env.HUGGINGFACE_API_KEY;
+export async function analyzeWithML(input: MLInput): Promise<MLOutput> {
+  const HF_KEY = process.env.HUGGINGFACE_API_KEY;
   
-  if (!HF_API_KEY) {
-    // Fallback to rule-based system if no API key
+  if (!HF_KEY) {
     return ruleBasedAnalysis(input);
   }
 
   try {
-    // Use FinBERT for financial sentiment
-    const sentiment = await analyzeFinancialSentiment(input);
-    
-    // Combine with technical indicators
-    const technicalScore = calculateTechnicalScore(input);
-    
-    // Weighted final decision
-    const finalScore = sentiment.score * 0.6 + technicalScore * 0.4;
+    const sentiment = await analyzeFinBERT(input);
+    const techScore = calculateTechnicalScore(input);
+    const finalScore = sentiment.score * 0.6 + techScore * 0.4;
     
     let signal: 'bullish' | 'bearish' | 'neutral';
     if (finalScore > 0.2) signal = 'bullish';
@@ -44,27 +33,25 @@ export async function analyzeWithTransformer(
     return {
       signal,
       confidence: Math.abs(finalScore),
-      reasoning: generateReasoning(input, sentiment, technicalScore)
+      reasoning: generateReasoning(input, sentiment, techScore)
     };
   } catch (error) {
-    console.error('Transformer error:', error);
+    console.error('ML error:', error);
     return ruleBasedAnalysis(input);
   }
 }
 
-async function analyzeFinancialSentiment(input: TransformerInput) {
+async function analyzeFinBERT(input: MLInput) {
   const HF_API_KEY = process.env.HUGGINGFACE_API_KEY!;
   
-  // Create market context text for FinBERT
   const marketContext = `
     Price momentum: ${input.ema9 > input.ema21 ? 'positive' : 'negative'}. 
     Funding rate: ${input.fundingRate > 0 ? 'bullish' : 'bearish'} at ${(input.fundingRate * 100).toFixed(3)}%.
     Bollinger position: ${input.bollingerPosition > 0 ? 'upper band' : 'lower band'}.
-    Volume trend: ${input.volume > 0 ? 'increasing' : 'decreasing'}.
   `;
 
   const response = await fetch(
-    'https://api-inference.huggingface.co/models/ProsusAI/finbert',
+    'https://api-inference.huggingface.co/models/cardiffnlp/twitter-roberta-base-sentiment-latest',
     {
       method: 'POST',
       headers: {
@@ -81,13 +68,13 @@ async function analyzeFinancialSentiment(input: TransformerInput) {
 
   const result = await response.json();
   
-  // FinBERT returns [positive, negative, neutral] scores
+  // New model returns: [[{label, score}, ...]]
   const scores = result[0];
   const sentiment = scores.reduce((max: any, curr: any) => 
     curr.score > max.score ? curr : max
   );
   
-  // Convert to -1 to 1 scale
+  // Map labels to -1 to 1 scale
   const sentimentMap: Record<string, number> = {
     'positive': 1,
     'negative': -1,
@@ -100,57 +87,33 @@ async function analyzeFinancialSentiment(input: TransformerInput) {
   };
 }
 
-function calculateTechnicalScore(input: TransformerInput): number {
+function calculateTechnicalScore(input: MLInput): number {
   let score = 0;
-  
-  // EMA crossover (40% weight)
-  if (input.ema9 > input.ema21) score += 0.4;
+  if (input.ema9 > input.ema21) score += 0.4; 
   else score -= 0.4;
-  
-  // Funding rate (30% weight)
-  if (input.fundingRate > 0.01) score -= 0.3; // High funding = overheated
-  else if (input.fundingRate < -0.01) score += 0.3; // Negative = undervalued
-  
-  // Bollinger position (30% weight)
-  if (input.bollingerPosition < -0.8) score += 0.3; // Oversold
-  else if (input.bollingerPosition > 0.8) score -= 0.3; // Overbought
-  
+  if (input.fundingRate > 0.01) score -= 0.3;
+  else if (input.fundingRate < -0.01) score += 0.3;
+  if (input.bollingerPosition < -0.8) score += 0.3;
+  else if (input.bollingerPosition > 0.8) score -= 0.3;
   return Math.max(-1, Math.min(1, score));
 }
 
-function generateReasoning(
-  input: TransformerInput,
-  sentiment: { score: number; label: string },
-  technicalScore: number
-): string {
+function generateReasoning(input: MLInput, sentiment: any, techScore: number): string {
   const reasons: string[] = [];
-  
-  // EMA trend
-  if (input.ema9 > input.ema21) {
-    reasons.push('Short-term trend above long-term');
-  } else {
-    reasons.push('Downward momentum detected');
-  }
-  
-  // Funding rate
+  if (input.ema9 > input.ema21) reasons.push('Bullish EMA crossover');
+  else reasons.push('Bearish EMA trend');
   if (Math.abs(input.fundingRate) > 0.01) {
-    reasons.push(`${input.fundingRate > 0 ? 'High' : 'Negative'} funding rate`);
+    reasons.push(`${input.fundingRate > 0 ? 'High' : 'Negative'} funding`);
   }
-  
-  // Bollinger bands
   if (Math.abs(input.bollingerPosition) > 0.8) {
-    reasons.push(`Price near ${input.bollingerPosition > 0 ? 'upper' : 'lower'} band`);
+    reasons.push(`${input.bollingerPosition > 0 ? 'Overbought' : 'Oversold'}`);
   }
-  
-  // ML sentiment
-  reasons.push(`ML sentiment: ${sentiment.label}`);
-  
+  reasons.push(`ML: ${sentiment.label}`);
   return reasons.join(' • ');
 }
 
-function ruleBasedAnalysis(input: TransformerInput): TransformerOutput {
+function ruleBasedAnalysis(input: MLInput): MLOutput {
   const score = calculateTechnicalScore(input);
-  
   let signal: 'bullish' | 'bearish' | 'neutral';
   if (score > 0.3) signal = 'bullish';
   else if (score < -0.3) signal = 'bearish';
@@ -159,6 +122,6 @@ function ruleBasedAnalysis(input: TransformerInput): TransformerOutput {
   return {
     signal,
     confidence: Math.abs(score),
-    reasoning: 'Rule-based analysis (no ML API key)'
+    reasoning: 'Rule-based (no ML key)'
   };
 }

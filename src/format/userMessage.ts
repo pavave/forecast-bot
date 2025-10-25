@@ -1,31 +1,32 @@
-export function formatForecastMessage({
-  pair,
-  currentPrice,
-  trend,
-  quantile,
-  fibonacci,
-  elliott,
-  bollinger,
-  volatilityHint,
-  transformerHint,
-}: {
-  pair: string;
-  currentPrice: number;
-  trend: string;
-  quantile: [number, number];
-  fibonacci: [number, number];
-  elliott: string;
-  bollinger: { upper: number; middle: number; lower: number };
-  volatilityHint: string;
-  transformerHint: string;
-}): string {
-  return `🔮 Forecast for ${pair}:
-- Current price: $${currentPrice}
-- Trend: ${trend}
-- Expected range (24h): $${quantile[0]} – $${quantile[1]}
-- Fibonacci support zone: $${fibonacci[0]} – $${fibonacci[1]}
-- Bollinger Bands: Upper $${bollinger.upper}, Lower $${bollinger.lower}
-- Volatility: ${volatilityHint}
-- Elliott: ${elliott}
-- Transformer signal: ${transformerHint}`;
+import { ForecastResult } from '../data/types';
+
+export function formatUserMessage(forecast: ForecastResult): string {
+  const emoji = {
+    'bullish': '🟢',
+    'bearish': '🔴',
+    'neutral': '⚪'
+  }[forecast.signal];
+  
+  const confidenceBar = '█'.repeat(Math.round(forecast.confidence * 10));
+  
+  return `
+📊 <b>${forecast.symbol} Forecast</b>
+
+💰 Price: $${forecast.price.toLocaleString()}
+${emoji} Signal: <b>${forecast.signal.toUpperCase()}</b>
+📈 Confidence: ${confidenceBar} ${(forecast.confidence * 100).toFixed(0)}%
+
+<b>Technical Analysis:</b>
+📉 EMA: ${forecast.analysis.ema.trend}
+📊 Bollinger: ${forecast.analysis.bollinger.signal}
+🎯 Fibonacci: ${forecast.analysis.fibonacci.currentLevel}
+💸 Funding: ${(forecast.analysis.fundingRate * 100).toFixed(3)}%
+
+🧠 <b>ML Analysis:</b>
+${forecast.analysis.ml.reasoning}
+
+💡 <b>Recommendation:</b> ${forecast.recommendation}
+
+<i>⚠️ Not financial advice. DYOR!</i>
+`.trim();
 }
