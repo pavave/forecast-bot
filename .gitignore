@@ -5,3 +5,4 @@ node_modules/
 dist/
 *.log
 backup-*/
+node_modules/
