@@ -29,3 +29,15 @@ ${forecast.analysis.ml.reasoning}
 <i>⚠️ Not financial advice. DYOR!</i>
 `.trim();
 }
+
+export function formatForecastMessage(data: {
+  pair: string;
+  currentPrice: number;
+  trend: string;
+  fibonacci: any;
+  bollinger: any;
+  volatilityHint: string;
+  transformerHint: string;
+}) {
+  return `Forecast for ${data.pair}: ${data.trend}. Price: $${data.currentPrice}. ${data.volatilityHint}. ${data.transformerHint}`;
+}

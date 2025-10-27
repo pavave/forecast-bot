@@ -68,3 +68,15 @@ export async function getTopPairs(limit = 20): Promise<string[]> {
     .slice(0, limit)
     .map((t: any) => t.symbol);
 }
+
+export async function fetchBinanceOHLCV(symbol: string, interval: string) {
+  // Заглушка: повертає 30 свічок
+  return Array.from({ length: 30 }, (_, i) => ({
+    time: Date.now() - i * 86400000,
+    open: 67000 + i * 10,
+    high: 67500 + i * 10,
+    low: 66500 + i * 10,
+    close: 68000 + i * 10,
+    volume: 100000 + i * 1000,
+  })).reverse();
+}

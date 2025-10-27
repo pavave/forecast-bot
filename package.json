@@ -4,15 +4,16 @@
   "description": "AI-powered crypto market forecasting bot",
   "main": "index.js",
   "scripts": {
-    "build": "echo 'Build skipped'",
     "build": "echo 'Build skipped for dev'",
     "deploy": "vercel --prod"
   },
   "dependencies": {
-    "@vercel/node": "^3.0.0"
+    "@vercel/node": "^2.3.0",
+    "react-router-dom": "^7.9.4"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/react-router-dom": "^5.3.3",
     "typescript": "^5.0.0"
   }
 }

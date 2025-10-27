@@ -1,10 +1,14 @@
 export function calculateFibonacci(prices: number[], lookback = 100) {
+  if (prices.length < lookback) {
+    throw new Error(`Not enough data for Fibonacci: need ${lookback}, got ${prices.length}`);
+  }
+
   const recent = prices.slice(-lookback);
   const high = Math.max(...recent);
   const low = Math.min(...recent);
   const range = high - low;
   const current = prices[prices.length - 1];
-  
+
   const levels = {
     level_0: high,
     level_236: high - range * 0.236,
@@ -14,14 +18,16 @@ export function calculateFibonacci(prices: number[], lookback = 100) {
     level_786: high - range * 0.786,
     level_1000: low
   };
-  
+
   let currentLevel = 'Unknown';
-  let signal = 'neutral';
-  
-  if (Math.abs(current - levels.level_618) / current < 0.01) {
+  let signal: 'support' | 'resistance' | 'neutral' = 'neutral';
+
+  const proximity = (target: number) => Math.abs(current - target) / current;
+
+  if (proximity(levels.level_618) < 0.01) {
     currentLevel = 'Near 61.8% (Golden Ratio)';
     signal = 'support';
-  } else if (Math.abs(current - levels.level_382) / current < 0.01) {
+  } else if (proximity(levels.level_382) < 0.01) {
     currentLevel = 'Near 38.2%';
     signal = 'resistance';
   } else if (current > levels.level_500) {
@@ -31,6 +37,6 @@ export function calculateFibonacci(prices: number[], lookback = 100) {
     currentLevel = 'Below 50% retracement';
     signal = 'support';
   }
-  
+
   return { levels, currentLevel, signal };
 }

@@ -125,3 +125,27 @@ function ruleBasedAnalysis(input: MLInput): MLOutput {
     reasoning: 'Rule-based (no ML key)'
   };
 }
+
+export async function transformerWorker(input: {
+  price: number;
+  volume: number;
+  fundingRate: number;
+  emaTrend: string;
+  elliottPhase: string;
+}) {
+  return "ML says: possible breakout";
+}
+
+export async function analyzeWithML(input: {
+  price: number;
+  volume: number;
+  ema9: number;
+  ema21: number;
+  fundingRate: number;
+  bollingerPosition: number;
+}) {
+  return {
+    signal: "bullish",
+    confidence: 0.8
+  };
+}
