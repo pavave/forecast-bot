@@ -6,7 +6,6 @@ import { calculateBollinger } from "./indicators/bollinger";
 import { formatForecastMessage } from "./format/userMessage";
 import { transformerWorker, analyzeWithML } from "./models/transformerWorker";
 import { MarketData, ForecastResult } from "./data/types";
-import { clear } from "console";
 
 type Candle = {
   time: number;
@@ -20,27 +19,23 @@ type Candle = {
 export class ForecastEngine {
   async run(pair: string): Promise<string> {
     const candles: Candle[] = await fetchBinanceOHLCV(pair, "1d");
+    const prices = candles.map(c => c.close);
 
-    const ema9 = getEMA(candles, 9);
-    const ema21 = getEMA(candles, 21);
-    const trend = ema9 > ema21 ? "Weak uptrend (EMA 9 > EMA 21)" : "Downtrend (EMA 9 < EMA 21)";
-
-    const fibonacci = getFibonacciLevels(candles);
-    const bollinger = getBollingerBands(candles);
-
+    const { ema9, ema21, trend } = analyzeEMA(prices);
+    const fibonacci = calculateFibonacci(prices);
+    const bollinger = calculateBollinger(prices);
     const volatilityHint =
       bollinger.upper - bollinger.lower < 0.01 * bollinger.middle
         ? "Low volatility — breakout likely"
         : "Wide bands — high volatility";
 
     const fundingRate = await fetchFundingRateFromBinance(pair);
-
     const transformerHint = await transformerWorker({
       price: candles[candles.length - 1].close,
       volume: candles[candles.length - 1].volume,
       fundingRate,
       emaTrend: trend,
-      elliottPhase: "N/A" // якщо elliottWavePhase видалено
+      elliottPhase: "N/A"
     });
 
     return formatForecastMessage({
@@ -56,7 +51,6 @@ export class ForecastEngine {
 
   async analyze(data: MarketData): Promise<ForecastResult> {
     const prices = data.ohlcv.map(c => c.close);
-
     const ema = analyzeEMA(prices);
     const bollinger = calculateBollinger(prices);
     const fibonacci = calculateFibonacci(prices);
@@ -73,6 +67,7 @@ export class ForecastEngine {
     const signals = [ml.signal];
     if (ema.ema9 > ema.ema21) signals.push("bullish");
     else signals.push("bearish");
+
     if (bollinger.signal === "oversold") signals.push("bullish");
     else if (bollinger.signal === "overbought") signals.push("bearish");
 
